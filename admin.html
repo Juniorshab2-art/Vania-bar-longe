@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111111">
+  <title>VANIA BAR LOUNGE — Gestion</title>
+  <style>
+    :root{color-scheme:dark;--gold:#d7b56d;--bg:#101012;--panel:#1a1a1e;--muted:#aaa;--line:#39342b;--green:#76d6a1;--red:#ff8c8c}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#29231a,#0b0b0d 460px);color:#f5f3ee;font:15px Arial,Helvetica,sans-serif;min-height:100vh}
+    header{padding:24px 18px 12px;text-align:center}.brand{color:var(--gold);font-size:clamp(25px,5vw,38px);letter-spacing:3px;font-weight:800}.subtitle{color:var(--muted);font-size:12px;letter-spacing:2px;text-transform:uppercase;margin-top:8px}
+    main{max-width:1400px;margin:auto;padding:12px 18px 36px}.toolbar,.card{background:#19191df2;border:1px solid var(--line);border-radius:14px;padding:18px;margin:12px 0;box-shadow:0 12px 30px #0004}
+    .toolbar{display:flex;gap:12px;align-items:end;flex-wrap:wrap}.field{display:grid;gap:6px;min-width:150px;flex:1}label{color:#d8caa9;font-size:12px}input,button{font:inherit}input[type=date],input[type=text],input[type=number]{background:#101013;color:#fff;border:1px solid #49433a;border-radius:8px;padding:10px;min-width:0;width:100%}input:focus{outline:2px solid #d7b56d66;border-color:var(--gold)}
+    button,.button{border:0;border-radius:8px;padding:11px 15px;background:var(--gold);color:#17130b;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;justify-content:center;align-items:center;gap:7px}button:hover,.button:hover{filter:brightness(1.08)}button.secondary{background:#292929;color:#f4e5c4;border:1px solid #62543a}button.danger{background:#542a2a;color:#ffe1e1;border:1px solid #754343}button.small{font-size:12px;padding:7px 9px}
+    .notice{font-size:13px;color:#f3dda9;line-height:1.55}.notice strong{color:var(--gold)}.cards{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:12px}.metric{background:#111114;border:1px solid #37332c;border-radius:11px;padding:15px}.metric span{display:block;color:var(--muted);font-size:12px;margin-bottom:8px}.metric strong{font-size:20px;color:var(--gold);overflow-wrap:anywhere}
+    h2{color:var(--gold);font-size:18px;margin:0 0 14px}.section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.table-wrap{overflow:auto;border:1px solid #39342b;border-radius:10px}table{border-collapse:collapse;width:100%;min-width:1040px;background:#111114}th,td{padding:9px 10px;border-bottom:1px solid #35332f;text-align:right;white-space:nowrap}th{position:sticky;top:0;background:#29251d;color:var(--gold);font-size:12px;text-transform:uppercase;z-index:1}td:first-child,th:first-child,td:nth-child(2),th:nth-child(2){text-align:left}td.product{font-weight:700}td input{width:90px;padding:8px;text-align:right}td.price input{width:110px}.empty{padding:20px;color:var(--muted);text-align:center}.muted{color:var(--muted)}.danger-text{color:var(--red)}.low{color:#ffb36b}.good{color:var(--green)}.total-row td{font-weight:800;color:var(--gold);background:#201d17}.products-grid{display:grid;grid-template-columns:minmax(180px,2fr) minmax(120px,1fr) minmax(130px,1fr) auto;gap:10px;align-items:end}.product-actions{display:flex;gap:6px;justify-content:flex-end}.hidden{display:none!important}.footer{text-align:center;color:#888;font-size:12px;padding:15px}.backup-help{font-size:12px;color:var(--muted);line-height:1.5}
+    @media(max-width:800px){.cards{grid-template-columns:repeat(2,minmax(130px,1fr))}.products-grid{grid-template-columns:1fr 1fr}.products-grid .field:first-child{grid-column:1/-1}.product-actions{grid-column:1/-1;justify-content:flex-start}main{padding:8px 10px 24px}.toolbar,.card{padding:14px}}
+    @media print{body{background:#fff;color:#111}.brand,h2,.metric strong{color:#111}.toolbar,.no-print,.notice,.footer{display:none!important}.card,.metric,table{background:#fff;color:#111;box-shadow:none}.card{border:0;padding:0}.cards{grid-template-columns:repeat(4,1fr)}th{position:static;background:#eee;color:#111}td,th{border:1px solid #999;padding:6px;color:#111}td input{display:none}.print-value{display:inline!important}main{max-width:none;padding:0}header{padding:5px}}
+  </style>
+</head>
+<body>
+  <header><div class="brand">VANIA BAR LOUNGE</div><div class="subtitle">Administration · stock & ventes journalières</div></header>
+  <main>
+    <section class="toolbar no-print">
+      <div class="field" style="max-width:240px"><label for="reportDate">Date du rapport</label><input id="reportDate" type="date"></div>
+      <button id="printBtn" type="button">Imprimer le rapport</button>
+      <button id="exportBtn" class="secondary" type="button">Sauvegarder les données</button>
+      <label class="button secondary" for="importFile">Restaurer une sauvegarde</label><input id="importFile" class="hidden" type="file" accept="application/json">
+    </section>
+    <section class="card notice"><strong>Mode de stockage actuel :</strong> les données sont enregistrées dans le navigateur de cet appareil. Cette première version ne synchronise pas encore les téléphones entre eux. Exportez régulièrement une sauvegarde et ne videz pas les données du navigateur avant de l’avoir sauvegardée.</section>
+    <section class="card"><h2>Résumé de la journée</h2><div class="cards">
+      <div class="metric"><span>Ventes totales</span><strong id="salesTotal">0 FC</strong></div>
+      <div class="metric"><span>Valeur du stock restant (prix de vente)</span><strong id="stockValue">0 FC</strong></div>
+      <div class="metric"><span>Unités vendues</span><strong id="unitsSold">0</strong></div>
+      <div class="metric"><span>Produits actifs</span><strong id="productCount">0</strong></div>
+    </div></section>
+    <section class="card"><div class="section-head"><h2>Fiche des ventes journalières</h2><div class="field" style="max-width:260px"><label for="search">Rechercher un produit</label><input id="search" type="text" placeholder="Nom du produit…"></div></div>
+      <p class="muted">Le stock initial est reporté depuis le dernier rapport enregistré. Le solde de la journée devient le stock initial du prochain rapport. P.T = ventes × prix unitaire ; valeur du stock restant = solde × prix unitaire.</p>
+      <div class="table-wrap"><table><thead><tr><th>N°</th><th>Article</th><th>Stock initial</th><th>Entrées</th><th>Total disponible</th><th>Ventes</th><th>P.U (FC)</th><th>P.T (FC)</th><th>Solde</th><th>Valeur du solde (FC)</th><th class="no-print">Actions</th></tr></thead><tbody id="reportRows"></tbody><tfoot id="reportFoot"></tfoot></table></div>
+    </section>
+    <section class="card no-print"><div class="section-head"><h2>Gestion des produits</h2><span class="muted">Ajoutez des produits ou modifiez le nom et le prix unitaire.</span></div>
+      <form id="addProductForm" class="products-grid">
+        <div class="field"><label for="newName">Nom du produit</label><input id="newName" type="text" required maxlength="80" placeholder="Ex. BAVARIA" autocomplete="off"></div>
+        <div class="field"><label for="newStock">Stock initial (unités)</label><input id="newStock" type="number" min="0" step="1" value="0" required></div>
+        <div class="field"><label for="newPrice">Prix unitaire (FC)</label><input id="newPrice" type="number" min="0" step="1" value="0" required></div>
+        <button type="submit">Ajouter le produit</button>
+      </form>
+      <p class="backup-help">Supprimer un produit le désactive pour les nouveaux rapports afin de conserver l’historique. Les produits au prix 0 doivent être complétés avant de calculer leur valeur de vente.</p>
+      <div id="productList"></div>
+    </section>
+    <div class="footer">VANIA BAR LOUNGE · Butembo, RDC</div>
+  </main>
+<script>
+(() => {
+  'use strict';
+  const STORAGE_KEY = 'vania-bar-lounge-v1';
+  const seed = [
+    ['BAVARIA',24,5500],['DROSTDY',5,15000],['ICE',5,5000],['RED BULL',20,6000],['JUS AFIA',13,3500],['SAVANA',33,6000],['HEINKEN',18,7000],['AMARULA GF',0,60000],['AMARULA PF',4,24000],['CELAR',1,24000],['SMIRNOFF GF',0,34000],['SMIRNOFF PF',7,12000],['UGANDA GF',0,24000],['UGANDA PF',15,10000],['RED LABEL GF',2,34000],['RED LABEL M',0,22000],['RED LABEL PF',4,15000],['XXL',12,3000],['D\'JINO',37,2000],['ENERGY',1,1500],['CASTEL GF',27,4500],['CASTEL PF',94,3000],['TEMBO GF',7,4500],['TEMBO PF',110,3000],['SIMBA',28,4500],['BOOSTER',40,3000],['BEAUFORT',45,3500],['TUSKER LT',28,5000],['TUSKER LG',16,5000],['GUINESS',21,5000],['3,3°',24,3500],['5,5°',86,3500],['DOPPEL',36,3500],['H20 GF',4,2500],['H20 PF',59,1000],['CLUB',11,5000],['BELL',11,5000],['SERENGETI',13,5000],['PRIMUS',0,0],['TURBO',0,0],['CHAMDOR',1,35000],['HUNDERS BEER',0,0],['KING FISH',0,0],['LEFFE',0,0],['VERRY STRONG',2,0],['KAMOTOMOTO',0,0],['SUCRE BRAL',0,0],['BLACK LABEL',0,0],['BAILEYS',1,0],['POWWER',2,0],['PRIMUS PF',0,0],['DOUBLE BLACK',0,0],['JACK DANIEL',0,0],['MUSCADORD',2,0],['MALIBU',0,0],['ASILIPOWER',11,0],['CUVEE BLANC',0,0],['VIN CASTEL',0,0],['DROSTDY GF',0,0]
+  ];
+  const $ = id => document.getElementById(id);
+  const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+  const uid = () => (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : `p-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const safeInt = value => { const n = Number(value); return Number.isFinite(n) ? Math.max(0, Math.floor(n)) : 0; };
+  const money = value => `${new Intl.NumberFormat('fr-FR').format(Math.round(Number(value)||0))} FC`;
+  const escapeHtml = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  let state;
+  try { state = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); } catch { state = null; }
+  if (!state || !Array.isArray(state.products) || !state.reports) {
+    state = {version:1,products:seed.map(([name,initial,price])=>({id:uid(),name,initialStock:initial,price,active:true})),reports:{}};
+  }
+  state.products.forEach(p => { if (!p.id) p.id=uid(); if (p.active === undefined) p.active=true; p.price=safeInt(p.price); p.initialStock=safeInt(p.initialStock); });
+  const persist = () => { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) { alert('Impossible d’enregistrer : espace de stockage du navigateur insuffisant. Exportez une sauvegarde.'); } };
+  const dateInput = $('reportDate'); dateInput.value=today();
+  const currentDate = () => dateInput.value || today();
+  const reportFor = date => {
+    if (!state.reports[date]) {
+      let previousDate = '';
+      Object.keys(state.reports).filter(d=>d<date).sort().forEach(d=>{ if(d>previousDate) previousDate=d; });
+      const previous = previousDate ? state.reports[previousDate] : null;
+      const items = {};
+      state.products.forEach(p=>{
+        const prevItem = previous && previous.items && previous.items[p.id];
+        items[p.id] = {opening:prevItem ? Math.max(0,safeInt(prevItem.opening)+safeInt(prevItem.entries)-safeInt(prevItem.sold)) : p.initialStock,entries:0,sold:0,price:p.price};
+      });
+      state.reports[date]={items}; persist();
+    }
+    const report=state.reports[date]; if(!report.items) report.items={};
+    state.products.forEach(p=>{ if(!report.items[p.id]) report.items[p.id]={opening:p.initialStock,entries:0,sold:0,price:p.price}; });
+    return report;
+  };
+  const rowTotals = (p,item) => {const opening=safeInt(item.opening),entries=safeInt(item.entries),sold=safeInt(item.sold),price=safeInt(item.price);return {opening,entries,sold,price,total:opening+entries,balance:opening+entries-sold,sales:sold*price,stockValue:(opening+entries-sold)*price};};
+  const render = () => {
+    const report=reportFor(currentDate());
+    const query=$('search').value.trim().toLocaleLowerCase('fr');
+    const active=state.products.filter(p=>p.active).filter(p=>p.name.toLocaleLowerCase('fr').includes(query));
+    let rows='';
+    active.forEach((p,index)=>{
+      const item=report.items[p.id], t=rowTotals(p,item);
+      rows+=`<tr data-id="${escapeHtml(p.id)}"><td>${index+1}</td><td class="product">${escapeHtml(p.name)}${t.price===0?' <span class="low" title="Prix à compléter">(prix manquant)</span>':''}</td><td><input aria-label="Stock initial ${escapeHtml(p.name)}" data-field="opening" type="number" min="0" step="1" value="${t.opening}"></td><td><input aria-label="Entrées ${escapeHtml(p.name)}" data-field="entries" type="number" min="0" step="1" value="${t.entries}"></td><td class="total">${t.total}</td><td><input aria-label="Ventes ${escapeHtml(p.name)}" data-field="sold" type="number" min="0" step="1" value="${t.sold}"></td><td class="price"><input aria-label="Prix unitaire ${escapeHtml(p.name)}" data-field="price" type="number" min="0" step="1" value="${t.price}"></td><td class="sales">${new Intl.NumberFormat('fr-FR').format(t.sales)}</td><td class="balance ${t.balance<0?'danger-text':''}">${t.balance}</td><td class="stock-value">${new Intl.NumberFormat('fr-FR').format(t.stockValue)}</td><td class="no-print"><button class="small secondary edit-product" type="button">Modifier</button></td></tr>`;
+    });
+    $('reportRows').innerHTML=rows||'<tr><td class="empty" colspan="11">Aucun produit actif trouvé.</td></tr>';
+    updateSummary(); renderProducts();
+  };
+  const updateSummary = () => {
+    const report=reportFor(currentDate()); let sales=0,stockValue=0,units=0;
+    state.products.filter(p=>p.active).forEach(p=>{const t=rowTotals(p,report.items[p.id]);sales+=t.sales;stockValue+=t.stockValue;units+=t.sold;});
+    $('salesTotal').textContent=money(sales);$('stockValue').textContent=money(stockValue);$('unitsSold').textContent=new Intl.NumberFormat('fr-FR').format(units);$('productCount').textContent=state.products.filter(p=>p.active).length;
+    let totalEntries=0,totalSold=0;
+    state.products.filter(p=>p.active).forEach(p=>{const t=rowTotals(p,report.items[p.id]);totalEntries+=t.entries;totalSold+=t.sold;});
+    $('reportFoot').innerHTML=`<tr class="total-row"><td colspan="3">TOTAL JOURNÉE</td><td>${totalEntries}</td><td></td><td>${totalSold}</td><td></td><td>${new Intl.NumberFormat('fr-FR').format(sales)}</td><td></td><td>${new Intl.NumberFormat('fr-FR').format(stockValue)}</td><td class="no-print"></td></tr>`;
+  };
+  const renderProducts=()=>{
+    const list=state.products.filter(p=>p.active);
+    $('productList').innerHTML='<h2 style="margin-top:22px">Produits actifs</h2>'+list.map(p=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid #35332f"><span>${escapeHtml(p.name)} <span class="muted">· ${money(p.price)} / unité · stock initial ${p.initialStock}</span></span><button class="small danger deactivate-product" data-id="${escapeHtml(p.id)}" type="button">Supprimer</button></div>`).join('');
+  };
+  $('reportRows').addEventListener('input',e=>{
+    const input=e.target.closest('input[data-field]'); if(!input)return;
+    const tr=input.closest('tr'),p=state.products.find(x=>x.id===tr.dataset.id);if(!p)return;
+    const report=reportFor(currentDate()), item=report.items[p.id], field=input.dataset.field;
+    item[field]=safeInt(input.value); if(field==='price') p.price=item.price;
+    persist();const t=rowTotals(p,item);
+    tr.querySelector('.total').textContent=t.total;tr.querySelector('.sales').textContent=new Intl.NumberFormat('fr-FR').format(t.sales);tr.querySelector('.balance').textContent=t.balance;tr.querySelector('.balance').classList.toggle('danger-text',t.balance<0);tr.querySelector('.stock-value').textContent=new Intl.NumberFormat('fr-FR').format(t.stockValue);
+    updateSummary();
+  });
+  $('reportRows').addEventListener('click',e=>{
+    const btn=e.target.closest('.edit-product');if(!btn)return;
+    const tr=btn.closest('tr'),p=state.products.find(x=>x.id===tr.dataset.id);if(!p)return;
+    const name=prompt('Nom du produit :',p.name);if(name===null)return;if(!name.trim()){alert('Le nom ne peut pas être vide.');return;}
+    const priceRaw=prompt('Prix unitaire en FC :',String(p.price));if(priceRaw===null)return;const price=safeInt(priceRaw);
+    p.name=name.trim();p.price=price;reportFor(currentDate()).items[p.id].price=price;persist();render();
+  });
+  $('addProductForm').addEventListener('submit',e=>{
+    e.preventDefault();const name=$('newName').value.trim();if(!name)return;
+    if(state.products.some(p=>p.active&&p.name.toLocaleLowerCase('fr')===name.toLocaleLowerCase('fr'))){alert('Ce produit existe déjà.');return;}
+    const p={id:uid(),name,initialStock:safeInt($('newStock').value),price:safeInt($('newPrice').value),active:true};state.products.push(p);
+    const report=reportFor(currentDate());report.items[p.id]={opening:p.initialStock,entries:0,sold:0,price:p.price};persist();e.target.reset();$('newStock').value='0';$('newPrice').value='0';render();
+  });
+  $('productList').addEventListener('click',e=>{const btn=e.target.closest('.deactivate-product');if(!btn)return;const p=state.products.find(x=>x.id===btn.dataset.id);if(!p)return;if(confirm(`Supprimer « ${p.name} » de la liste des produits actifs ? L’historique sera conservé.`)){p.active=false;persist();render();}});
+  dateInput.addEventListener('change',render);$('search').addEventListener('input',render);$('printBtn').addEventListener('click',()=>window.print());
+  $('exportBtn').addEventListener('click',()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`vania-sauvegarde-${currentDate()}.json`;a.click();URL.revokeObjectURL(a.href);});
+  $('importFile').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{const imported=JSON.parse(await file.text());if(!Array.isArray(imported.products)||!imported.reports)throw new Error('format');if(confirm('Restaurer cette sauvegarde remplacera les données locales de cet appareil. Continuer ?')){state=imported;persist();render();alert('Sauvegarde restaurée.');}}catch{alert('Fichier invalide ou illisible.');}e.target.value='';});
+  persist();render();
+})();
+</script>
+</body>
+</html>
